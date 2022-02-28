@@ -1,3 +1,6 @@
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
 #define OLED_WIDTH 128//sets length and width
 #define OLED_HEIGHT 64
 
