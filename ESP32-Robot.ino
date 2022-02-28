@@ -19,7 +19,7 @@ void setup()
   pinMode(IRRight, INPUT);
   // Stop the robot
   analogWrite(FrontRight, LOW);
-  analogWrite(Frontleft, LOW);
+  analogWrite(FrontLeft, LOW);
   analogWrite(BackRight, LOW);
   analogWrite(BackLeft, LOW);
   // Show groupname on display
@@ -29,8 +29,8 @@ void setup()
 
 void loop()
 {
-  int sRight = analogRead(IRrechts);
-  int sLeft = analogRead(IRlinks);
+  int sRight = analogRead(IRRight);
+  int sLeft = analogRead(IRLeft);
   display.clearDisplay(); // clears display
   display.invertDisplay(false);
   display.setTextSize(2); // sets text size
@@ -73,3 +73,4 @@ void loop()
     analogWrite(BackRight, LOW);
     analogWrite(BackLeft, LOW);
   }
+}
