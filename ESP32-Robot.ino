@@ -43,7 +43,8 @@ void loop()
   display.print("L: ");
   display.print(sLeft); // displays text
   display.display();
-  boolean right = false;
+  int backCount = 0;
+/*  boolean right = false;
   boolean left = false;
   if (sRight > 3600 && sRight < 3950)
   {
@@ -72,5 +73,44 @@ void loop()
     analogWrite(FrontLeft, LOW);
     analogWrite(BackRight, LOW);
     analogWrite(BackLeft, LOW);
+  }*/
+  if (sRight > 2700 && sLeft > 2700)
+  {
+    backCount = 0;
+    analogWrite(BackRight, LOW);
+    analogWrite(BackLeft, LOW);
+    analogWrite(FrontRight, 200);
+    analogWrite(FrontLeft, 200);
+  }
+    if (sRight < 2700 && sLeft > 2700)
+  {
+    backCount = 0;
+    analogWrite(FrontLeft, LOW);
+    analogWrite(BackRight, LOW);
+    analogWrite(FrontRight, 200);
+    analogWrite(BackLeft, 200);
+  }
+    if (sRight > 2700 && sLeft < 2700)
+  {
+    backCount = 0;
+    analogWrite(FrontRight, LOW);
+    analogWrite(BackLeft, LOW);
+    analogWrite(FrontLeft, 200);
+    analogWrite(BackRight, 200);
+  }
+    if (sRight < 2700 && sLeft < 2700)
+  {
+    backCount+=1;
+    analogWrite(FrontLeft, LOW);
+    analogWrite(FrontRight, LOW);
+    analogWrite(BackLeft, 200);
+    analogWrite(BackRight, 200);
+  }
+  if (backCount > 10)
+  {
+    analogWrite(FrontLeft, LOW);
+    analogWrite(FrontRight, LOW);
+    analogWrite(BackLeft, LOW);
+    analogWrite(BackRight, LOW);
   }
 }

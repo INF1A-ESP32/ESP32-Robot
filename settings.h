@@ -1,16 +1,16 @@
 // *************************
 //          Wheels
 // *************************
-int FrontRight = 17;
-int BackRight = 16;
-int FrontLeft = 18;
-int BackLeft = 5;
+int FrontRight = 16;
+int BackRight = 17;
+int FrontLeft = 5;
+int BackLeft = 18;
 
 // *************************
 //    Speed ofset wheels
 // *************************
-int speedL = 233;
-int speedR = 214;
+int speedL = 214;
+int speedR = 233;
 // float speedL = 180;
 // float speedR = speedL-19;
 
