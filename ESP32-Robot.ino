@@ -34,7 +34,7 @@ void loop()
   display.clearDisplay(); // clears display
   display.invertDisplay(false);
   display.setTextSize(2); // sets text size
-  display.setTextColor(WHITE);
+  display.setTextColor(WHITE); //sets text color
   display.setCursor(2, 6); // sets cursor
   display.print("R: ");
   display.print(sRight);    // displays text
@@ -42,7 +42,15 @@ void loop()
   display.setCursor(2, 26); // sets cursor
   display.print("L: ");
   display.print(sLeft); // displays text
+
+  int DFront = analogRead(DistanceFront);
+  Serial.printLn(DFront);
+  display.print("Distance: ");
+  display.setTextSize(1);   // sets text size(to 1)
+  display.setCursor(2, 46); // sets cursor
+  display.print(DFront);    // displays text
   display.display();
+    
   boolean right = false;
   boolean left = false;
   if (sRight > 3600 && sRight < 3950)

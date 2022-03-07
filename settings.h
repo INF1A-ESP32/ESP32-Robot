@@ -14,7 +14,13 @@ int speedR = 214;
 // float speedL = 180;
 // float speedR = speedL-19;
 
-//*************
-
+//*************************
+//        Display
+//*************************
 int IRLeft = 34;
 int IRRight = 39;
+
+//************************
+//     Sensor voorkant
+//************************
+int DistanceFront = Wire.read(); //byte as char
