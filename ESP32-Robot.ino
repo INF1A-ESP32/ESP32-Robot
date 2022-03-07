@@ -2,6 +2,7 @@
 #include <Wire.h>
 // Load the `ESP32 AnalogWrite` by Brian Taylor
 #include <analogWrite.h>
+#include "Adafruit_VL53L0X.h"
 // Load the settings and own modules
 #include "settings.h"
 #include "display.h"
@@ -55,7 +56,7 @@ void loop()
   boolean left = false;
   if (sRight > 3600 && sRight < 3950)
   {
-    right = true;
+    right = true; //return positive when
   }
   if (sLeft > 3600 && sLeft < 3950)
   {

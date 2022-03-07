@@ -19,8 +19,3 @@ int speedR = 214;
 //*************************
 int IRLeft = 34;
 int IRRight = 39;
-
-//************************
-//     Sensor voorkant
-//************************
-int DistanceFront = Wire.read(); //byte as char
