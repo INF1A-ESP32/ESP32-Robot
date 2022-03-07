@@ -26,6 +26,56 @@ void setup()
   displayBootAnimation();
   delay(3000);
 }
+int backCount = 0;
+
+void strait()
+//drive strait
+{
+  backCount = 0;
+  analogWrite(BackRight, LOW);
+  analogWrite(BackLeft, LOW);
+  analogWrite(FrontRight, v);
+  analogWrite(FrontLeft, v);
+}
+
+void left()
+//drive left
+{
+  backCount = 0;
+  analogWrite(FrontLeft, LOW);
+  analogWrite(BackRight, LOW);
+  analogWrite(FrontRight, v);
+  analogWrite(BackLeft, v);
+}
+
+void right()
+//drive right
+{
+  backCount = 0;
+  analogWrite(FrontRight, LOW);
+  analogWrite(BackLeft, LOW);
+  analogWrite(FrontLeft, v);
+  analogWrite(BackRight, v);
+}
+
+void back()
+//drive back
+{
+  backCount++;
+  analogWrite(FrontLeft, LOW);
+  analogWrite(FrontRight, LOW);
+  analogWrite(BackLeft, v);
+  analogWrite(BackRight, v);
+}
+
+void off()
+//turn off
+{
+  analogWrite(FrontLeft, LOW);
+  analogWrite(FrontRight, LOW);
+  analogWrite(BackLeft, LOW);
+  analogWrite(BackRight, LOW);
+}
 
 void loop()
 {
@@ -35,82 +85,33 @@ void loop()
   display.invertDisplay(false);
   display.setTextSize(2); // sets text size
   display.setTextColor(WHITE);
-  display.setCursor(2, 6); // sets cursor
+  display.setCursor(0, 6); // sets cursor
   display.print("R: ");
   display.print(sRight);    // displays text
-  display.setTextSize(2);   // sets text size
-  display.setCursor(2, 26); // sets cursor
+  display.setCursor(0, 26);
   display.print("L: ");
-  display.print(sLeft); // displays text
+  display.print(sLeft);
   display.display();
-  int backCount = 0;
-/*  boolean right = false;
-  boolean left = false;
-  if (sRight > 3600 && sRight < 3950)
-  {
-    right = true;
-  }
-  if (sLeft > 3600 && sLeft < 3950)
-  {
-    left = true;
-  }
-  if (right & left)
-  {
-    analogWrite(FrontRight, speedR);
-    analogWrite(FrontLeft, speedL);
-  }
-  else if (right)
-  {
-    analogWrite(FrontLeft, 200);
-  }
-  else if (left)
-  {
-    analogWrite(FrontRight, 200);
-  }
-  else
-  {
-    analogWrite(FrontRight, LOW);
-    analogWrite(FrontLeft, LOW);
-    analogWrite(BackRight, LOW);
-    analogWrite(BackLeft, LOW);
-  }*/
   if (sRight > 2700 && sLeft > 2700)
   {
-    backCount = 0;
-    analogWrite(BackRight, LOW);
-    analogWrite(BackLeft, LOW);
-    analogWrite(FrontRight, 200);
-    analogWrite(FrontLeft, 200);
+    strait();
   }
-    if (sRight < 2700 && sLeft > 2700)
+  if (sRight < 2700 && sLeft > 2700)
   {
-    backCount = 0;
-    analogWrite(FrontLeft, LOW);
-    analogWrite(BackRight, LOW);
-    analogWrite(FrontRight, 200);
-    analogWrite(BackLeft, 200);
+    left();
   }
-    if (sRight > 2700 && sLeft < 2700)
+  if (sRight > 2700 && sLeft < 2700)
   {
-    backCount = 0;
-    analogWrite(FrontRight, LOW);
-    analogWrite(BackLeft, LOW);
-    analogWrite(FrontLeft, 200);
-    analogWrite(BackRight, 200);
+    right();
   }
-    if (sRight < 2700 && sLeft < 2700)
+  if (sRight < 2700 && sLeft < 2700 && backCount < 10)
   {
-    backCount+=1;
-    analogWrite(FrontLeft, LOW);
-    analogWrite(FrontRight, LOW);
-    analogWrite(BackLeft, 200);
-    analogWrite(BackRight, 200);
+    back();
+    delay(100);
   }
-  if (backCount > 10)
+  if (backCount >= 10)
+  //turn off after 1 second
   {
-    analogWrite(FrontLeft, LOW);
-    analogWrite(FrontRight, LOW);
-    analogWrite(BackLeft, LOW);
-    analogWrite(BackRight, LOW);
+    off();
   }
 }

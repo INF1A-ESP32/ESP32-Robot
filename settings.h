@@ -1,10 +1,10 @@
 // *************************
 //          Wheels
 // *************************
-int FrontRight = 16;
-int BackRight = 17;
-int FrontLeft = 5;
-int BackLeft = 18;
+const int FrontRight = 16;
+const int BackRight = 17;
+const int FrontLeft = 5;
+const int BackLeft = 18;
 
 // *************************
 //    Speed ofset wheels
@@ -13,8 +13,9 @@ int speedL = 214;
 int speedR = 233;
 // float speedL = 180;
 // float speedR = speedL-19;
+const int v = 150;
 
 //*************
 
-int IRLeft = 34;
-int IRRight = 39;
+const int IRLeft = 34;
+const int IRRight = 39;
