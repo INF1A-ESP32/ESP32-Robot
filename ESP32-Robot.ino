@@ -5,6 +5,7 @@
 // Load the settings and own modules
 #include "settings.h"
 #include "display.h"
+#include "drive.h"
 
 void setup()
 {
@@ -26,59 +27,10 @@ void setup()
   displayBootAnimation();
   delay(3000);
 }
-int backCount = 0;
-
-void strait()
-//drive strait
-{
-  backCount = 0;
-  analogWrite(BackRight, LOW);
-  analogWrite(BackLeft, LOW);
-  analogWrite(FrontRight, v);
-  analogWrite(FrontLeft, v);
-}
-
-void left()
-//drive left
-{
-  backCount = 0;
-  analogWrite(FrontLeft, LOW);
-  analogWrite(BackRight, LOW);
-  analogWrite(FrontRight, v);
-  analogWrite(BackLeft, v);
-}
-
-void right()
-//drive right
-{
-  backCount = 0;
-  analogWrite(FrontRight, LOW);
-  analogWrite(BackLeft, LOW);
-  analogWrite(FrontLeft, v);
-  analogWrite(BackRight, v);
-}
-
-void back()
-//drive back
-{
-  backCount++;
-  analogWrite(FrontLeft, LOW);
-  analogWrite(FrontRight, LOW);
-  analogWrite(BackLeft, v);
-  analogWrite(BackRight, v);
-}
-
-void off()
-//turn off
-{
-  analogWrite(FrontLeft, LOW);
-  analogWrite(FrontRight, LOW);
-  analogWrite(BackLeft, LOW);
-  analogWrite(BackRight, LOW);
-}
 
 void loop()
 {
+  unsigned long currentMillis = millis();
   int sRight = analogRead(IRRight);
   int sLeft = analogRead(IRLeft);
   display.clearDisplay(); // clears display
@@ -92,6 +44,15 @@ void loop()
   display.print("L: ");
   display.print(sLeft);
   display.display();
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    if (vTurn == LOW){
+      vTurn = v;
+    }
+    else {
+      vTurn = LOW;
+    }
+  }
   if (sRight > 2700 && sLeft > 2700)
   {
     strait();
