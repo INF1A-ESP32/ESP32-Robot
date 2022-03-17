@@ -1,7 +1,7 @@
 int backCount = 0;
 
-void strait()
-//drive strait
+void straight()
+//drive straight
 {
   backCount = 0;
   analogWrite(BackRight, LOW);

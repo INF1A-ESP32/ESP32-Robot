@@ -14,7 +14,8 @@ int speedL = 214;
 int speedR = 233;
 // float speedL = 180;
 // float speedR = speedL-19;
-const int v = 190;
+const int v = 190; 
+//const int v = 150;
 
 //*************
 

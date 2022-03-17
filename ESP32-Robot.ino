@@ -53,24 +53,30 @@ void loop()
       vTurn = LOW;
     }
   }
-  if (sRight > 2700 && sLeft > 2700)
+  if (sRight < 120 && sLeft < 120)//If on white surface, go straight
   {
-    strait();
+    straight();
   }
-  if (sRight < 2700 && sLeft > 2700)
+  if (sRight < 120 && sLeft > 120)//If right is on white and left is on black, go right
   {
-    left();
-  }
-  if (sRight > 2700 && sLeft < 2700)
-  {
+    off();
+    delay(200);
     right();
   }
-  if (sRight < 2700 && sLeft < 2700 && backCount < 10)
+  if (sRight > 120 && sLeft < 120)//if right is on black and left is on white, go left
+  { 
+    off();
+    delay(200);
+    left();
+  }
+  if (sRight > 120 && sLeft > 120 && backCount < 10)//if on black surface go back.
   {
+    off();
     back();
     delay(100);
+    right();
   }
-  if (backCount >= 10)
+  if (backCount >= 9)
   //turn off after 1 second
   {
     off();
