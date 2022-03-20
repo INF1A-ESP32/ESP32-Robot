@@ -44,49 +44,48 @@ void setup()
 
 void loop()
 {
-  unsigned long currentMillis = millis();
   int sRight = analogRead(IRRight);
   int sLeft = analogRead(IRLeft);
   display.clearDisplay(); // clears display
   display.invertDisplay(false);
   display.setTextSize(2); // sets text size
   display.setTextColor(WHITE);
-  display.setCursor(0, 6); // sets cursor
+  display.setCursor(2, 6); // sets cursor
   display.print("R: ");
   display.print(sRight);    // displays text
-  display.setCursor(0, 26);
+  display.setTextSize(2);   // sets text size
+  display.setCursor(2, 26); // sets cursor
   display.print("L: ");
-  display.print(sLeft);
+  display.print(sLeft); // displays text
   display.display();
-  if (currentMillis - previousMillis >= interval) {
-    previousMillis = currentMillis;
-    if (vTurn == LOW){
-      vTurn = v;
-    }
-    else {
-      vTurn = LOW;
-    }
-  }
-  if (sRight > 2700 && sLeft > 2700)
+  boolean right = false;
+  boolean left = false;
+  if (sRight > 3600 && sRight < 3950)
   {
-    strait();
+    right = true;
   }
-  if (sRight < 2700 && sLeft > 2700)
+  if (sLeft > 3600 && sLeft < 3950)
   {
-    left();
+    left = true;
   }
-  if (sRight > 2700 && sLeft < 2700)
+  if (right & left)
   {
-    right();
+    analogWrite(FrontRight, speedR);
+    analogWrite(FrontLeft, speedL);
   }
-  if (sRight < 2700 && sLeft < 2700 && backCount < 10)
+  else if (right)
   {
-    back();
-    delay(100);
+    analogWrite(FrontLeft, 200);
   }
-  if (backCount >= 10)
-  //turn off after 1 second
+  else if (left)
   {
-    off();
+    analogWrite(FrontRight, 200);
+  }
+  else
+  {
+    analogWrite(FrontRight, LOW);
+    analogWrite(FrontLeft, LOW);
+    analogWrite(BackRight, LOW);
+    analogWrite(BackLeft, LOW);
   }
 }
