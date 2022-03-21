@@ -4,6 +4,7 @@
 #include <analogWrite.h>
 // Load the settings and own modules
 #include "settings.h"
+#include "websocket.h"
 #include "display.h"
 
 void setup()
@@ -24,6 +25,7 @@ void setup()
   analogWrite(BackLeft, LOW);
   // Show groupname on display
   displayBootAnimation();
+  connectWebSocket();
   delay(3000);
 }
 
@@ -73,4 +75,5 @@ void loop()
     analogWrite(BackRight, LOW);
     analogWrite(BackLeft, LOW);
   }
+  webSocket.loop();
 }

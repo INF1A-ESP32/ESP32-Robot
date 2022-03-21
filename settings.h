@@ -18,3 +18,11 @@ int speedR = 214;
 
 int IRLeft = 34;
 int IRRight = 39;
+
+
+// Wifi Credentials
+const char* ssid = "XXX"; // Wifi SSID
+const char* password = "XXX"; //Wi-FI Password
+
+const char* webSocketHost = "192.168.210.155";
+const int webSocketPort = 8080;
