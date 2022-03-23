@@ -7,8 +7,7 @@
 #include "websocket.h"
 #include "display.h"
 
-void setup()
-{
+void setup() {
   // Start the serial monitor
   Serial.begin(115200);
   // Register the wheels as output pins
@@ -29,47 +28,37 @@ void setup()
   delay(3000);
 }
 
-void loop()
-{
+void loop() {
   int sRight = analogRead(IRRight);
   int sLeft = analogRead(IRLeft);
-  display.clearDisplay(); // clears display
+  display.clearDisplay();  // clears display
   display.invertDisplay(false);
-  display.setTextSize(2); // sets text size
+  display.setTextSize(2);  // sets text size
   display.setTextColor(WHITE);
-  display.setCursor(2, 6); // sets cursor
+  display.setCursor(2, 6);  // sets cursor
   display.print("R: ");
-  display.print(sRight);    // displays text
-  display.setTextSize(2);   // sets text size
-  display.setCursor(2, 26); // sets cursor
+  display.print(sRight);     // displays text
+  display.setTextSize(2);    // sets text size
+  display.setCursor(2, 26);  // sets cursor
   display.print("L: ");
-  display.print(sLeft); // displays text
+  display.print(sLeft);  // displays text
   display.display();
   boolean right = false;
   boolean left = false;
-  if (sRight > 3600 && sRight < 3950)
-  {
+  if (sRight > 3600 && sRight < 3950) {
     right = true;
   }
-  if (sLeft > 3600 && sLeft < 3950)
-  {
+  if (sLeft > 3600 && sLeft < 3950) {
     left = true;
   }
-  if (right & left)
-  {
+  if (right & left) {
     analogWrite(FrontRight, speedR);
     analogWrite(FrontLeft, speedL);
-  }
-  else if (right)
-  {
+  } else if (right) {
     analogWrite(FrontLeft, 200);
-  }
-  else if (left)
-  {
+  } else if (left) {
     analogWrite(FrontRight, 200);
-  }
-  else
-  {
+  } else {
     analogWrite(FrontRight, LOW);
     analogWrite(FrontLeft, LOW);
     analogWrite(BackRight, LOW);
