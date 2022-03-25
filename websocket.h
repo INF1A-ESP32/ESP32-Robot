@@ -1,69 +1,146 @@
-#include <WiFi.h>              // ESP32 WiFi Library
-#include <WebSocketsClient.h>  // WebSocket Client Library for WebSocket
-#include <ArduinoJson.h>       // Arduino JSON Library
+/*
+-------------------------------------
+ Include external liberaries
+-------------------------------------
+*/
+// ESP32 WiFi Library
+#include <WiFi.h>
+// Websocket Client 
+#include <WebSocketsClient.h>
+// Arduino JSON
+#include <ArduinoJson.h>
 
 WebSocketsClient webSocket;   // websocket client class instance
-StaticJsonDocument<100> doc;  // Allocate a static JSON document
-
-bool ws_loggedin = false;
-bool ws_connected = false;    // to keep track of status of the websocket
-bool ws_has_json = false;     // to keep track if the websocket request has json
+StaticJsonDocument<400> doc;  // Allocate a static JSON document
 
 void sendMessageWebSocket(String wsData, char* wsMessage = "data") {
   String wsString = String(wsData);
-  Serial.printf("[Websocket] send %s: %s\n", wsMessage, wsString);
+  Serial.printf("[Websocket] send %s:", wsMessage);
+  Serial.println(wsString.c_str());
   webSocket.sendTXT(wsString);
 }
 
-void webSocketEvent(WStype_t WStype, uint8_t* payload, size_t length) {
-  // Try to parse JSON
-  auto error = deserializeJson(doc, payload);
-  ws_has_json = false;
-  if (!error) ws_has_json = true;
-  const char* json_loggedin = doc["loggedin"];
-  const char* json_action = doc["action"];
-  const char* json_status = doc["status"];
-  const char* json_start = doc["start"];
-  String login_msg = "{\"action\": \"login\", \"id\":\"" + String(WiFi.macAddress().c_str()) + "\"}";
+void wsStatusSend() {
+  sendMessageWebSocket("{\"status\":\"" + robot_status + "\", \"isDriving\": " + robot_is_driving + ", \"acceleration\": " + String(robot_acceleration) + "}");
+}
 
+bool validGame(String gameName){
+  return (gameName == "maze" || gameName == "race");
+} 
+
+String converter(uint8_t* str) {
+  return String((char*)str);
+}
+void webSocketEvent(WStype_t WStype, uint8_t* payload, size_t length) {
+  String raw_data = converter(payload).c_str();
+  // Try to parse JSON
+  DeserializationError error = deserializeJson(doc, raw_data);
+  wsHasJson = false;
+  if (!error) wsHasJson = true;
+  const bool json_loggedin = doc["loggedin"];
+  const String json_action = doc["action"];
+  const String json_status = doc["status"];
+  const String json_start = doc["start"];
+  const String json_game = doc["game"];
+  //String device_mac = WiFi.macAddress();
+  String device_mac = "FC:F5:C4:2F:45:5C";
+  String login_msg = "{\"action\": \"login\", \"id\":\"" + device_mac + "\"}";
   // switch case for the different types of websocket events
   switch (WStype) {
     case WStype_DISCONNECTED:
       Serial.println("[Websocket] Connection lost!!");
-      ws_connected = false;
+      wsConnected = false;
+      setGameDefaults(); // Stop robot and reset defaults
       break;
 
     case WStype_CONNECTED:
       Serial.printf("[Websocket] Connected to websocket: %s:%i\n", webSocketHost, webSocketPort);
-      ws_connected = true;
-      // Authenticate with the websocket client
-      sendMessageWebSocket(login_msg, "credentials");
-      ws_has_json = false;
+      wsConnected = true;
 
+      // Authenticate with the websocket client
+
+      sendMessageWebSocket(login_msg, "credentials");
+      delay(1000);
+      robot_status = "preparing";
+      wsStatusSend();
       delay(2000);
-      sendMessageWebSocket("{\"status\":\"preparing\", \"isDriving\": false, \"acceleration\": 0}");
-      // delay(1000);
-      //      sendMessageWebSocket("{\"status\":\"ready\", \"ready\": true}");
-      //sendMessageWebSocket("Hallo");
+      robot_status = "ready";
+      prepairGame = false; 
+      playGame = false;
+      gameReady = false;
+      gameName = "";
+      sendMessageWebSocket("Piweter hfkjsdf");
       break;
 
     case WStype_TEXT:
-      Serial.printf("[Websocket] recieved data: %s\n", payload);
-      if (!ws_has_json) {
+      Serial.printf("[Websocket] get text: %s\n", payload);
+      if (!wsHasJson) {
         // If there whas a error with parsing the json display it
         Serial.print("deserializeJson() failed with code ");
         Serial.println(error.c_str());
+        // Send the server a request that they have send invalid JSON
+        sendMessageWebSocket("{\"error\": \"INVALID_JSON\"}");
         break;
       }
 
-      if (json_loggedin){
-        Serial.printf("[Websocket] recieved data: loggedin=%s\n", json_loggedin);
+      // Handle when login data is send
+      if (json_loggedin) {
+        Serial.println("[Websocket] Login Success");
+        wsLoggedin = true;
+      } else if (!wsLoggedin) {
+        wsLoggedin = false;
+        // Todo max 3 times try bevore error
+        Serial.printf("[Websocket] Login Fail try \n");
+        Serial.println("[Websocket] Server now will close connection");
       }
 
+      if (json_action) {
+        Serial.println("[Websocket] Got an action");
+        if (json_game!="null" && !validGame(json_game)) {
+          Serial.println("[Websocket] Game cannot be found");
+          sendMessageWebSocket("{\"error\": \"GAME_NOT_FOUND\"}");
+          if (json_action == "prepare") {
+            sendMessageWebSocket("{\"error\": \"GAME_NOT_PREPARED\"}");
+          }
+          sendMessageWebSocket("{\"status\": false, \"game\": \"" + json_game + "\"}");
+          break;
+        }
+        if (json_action == "prepare") {
+          // Start prepairing the game
+          Serial.println("[Websocket] Start Prepairing game");
+          robot_status = "preparing_game";
+          prepairGame = true;
+          gameName = json_game;
+        } else if (json_action == "start") {
+          // Start game
+          Serial.println("[Websocket] Starting game");
+          if (!gameReady) {
+            robot_status = "in_game";
+            sendMessageWebSocket("{\"error\": \"GAME_NOT_READY\"}");
+            break;
+          }
+          prepairGame = false;
+          playGame = true;
+          gameName = json_game;
+        } else if (json_action == "ended") {
+          // Game ended
+          // Start game
+          Serial.println("[Websocket] Stopping game");
+          analogWrite(FrontRight, 0);
+          analogWrite(FrontLeft, 0);
+          analogWrite(BackRight, 0);
+          analogWrite(BackLeft, 0);
+          setGameDefaults();
+        }
+      }
+
+
       // Print the status and action from the json data
-      if (json_status) Serial.printf("[Websocket] recieved data: status=%s\n", json_status);
-      if (json_action) Serial.printf("[Websocket] recieved data: action=%s\n", json_action);
-      if (json_start) Serial.printf("[Websocket] recieved data: start=%s\n", json_start);
+      Serial.printf("[Websocket] recieved data: game=%s\n", json_game);
+      Serial.printf("[Websocket] recieved data: status=%s\n", json_status);
+      Serial.printf("[Websocket] recieved data: action=%s\n", json_action);
+      Serial.printf("[Websocket] recieved data: start=%s\n", json_start);
+
       break;
 
     case WStype_PING:
@@ -95,6 +172,8 @@ void connectWebSocket() {
   Serial.println(WiFi.SSID());
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
+  String hostname = "Robby";
+  WiFi.setHostname(hostname.c_str());
   Serial.print("Mac Address: ");
   Serial.println(WiFi.macAddress());
 
