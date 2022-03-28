@@ -21,8 +21,8 @@ int IRRight = 39;
 
 
 // Wifi Credentials
-const char* ssid = "test"; // Wifi SSID
-const char* password = "95151779"; //Wi-FI Password
+const char* ssid = "Wifi is saai"; // Wifi SSID
+const char* password = "2much4u2day"; //Wi-FI Password
 
-const char* webSocketHost = "192.168.0.101";
+const char* webSocketHost = "192.168.20.155";
 const int webSocketPort = 3003;
