@@ -36,14 +36,16 @@ void webSocketEvent(WStype_t WStype, uint8_t* payload, size_t length) {
   // Try to parse JSON
   DeserializationError error = deserializeJson(doc, raw_data);
   wsHasJson = false;
+
   if (!error) wsHasJson = true;
+
   const bool json_loggedin = doc["loggedin"];
   const String json_action = doc["action"];
   const String json_status = doc["status"];
   const String json_start = doc["start"];
   const String json_game = doc["game"];
-  //String device_mac = WiFi.macAddress();
-  String device_mac = "FC:F5:C4:2F:45:5C";
+
+  String device_mac = WiFi.macAddress();
   String login_msg = "{\"action\": \"login\", \"id\":\"" + device_mac + "\"}";
   // switch case for the different types of websocket events
   switch (WStype) {
@@ -56,20 +58,12 @@ void webSocketEvent(WStype_t WStype, uint8_t* payload, size_t length) {
     case WStype_CONNECTED:
       Serial.printf("[Websocket] Connected to websocket: %s:%i\n", webSocketHost, webSocketPort);
       wsConnected = true;
-
+      
       // Authenticate with the websocket client
-
       sendMessageWebSocket(login_msg, "credentials");
       delay(1000);
       robot_status = "preparing";
       wsStatusSend();
-      delay(2000);
-      robot_status = "ready";
-      prepairGame = false; 
-      playGame = false;
-      gameReady = false;
-      gameName = "";
-      sendMessageWebSocket("Piweter hfkjsdf");
       break;
 
     case WStype_TEXT:
@@ -86,14 +80,24 @@ void webSocketEvent(WStype_t WStype, uint8_t* payload, size_t length) {
       // Handle when login data is send
       if (json_loggedin) {
         Serial.println("[Websocket] Login Success");
+        delay(2000);
+        robot_status = "ready";
+        prepairGame = false; 
+        playGame = false;
+        gameReady = false;
+        gameName = "";
         wsLoggedin = true;
       } else if (!wsLoggedin) {
+        Serial.println(json_loggedin);
         wsLoggedin = false;
         // Todo max 3 times try bevore error
         Serial.printf("[Websocket] Login Fail try \n");
         Serial.println("[Websocket] Server now will close connection");
+        // TODO KILL CONNECTION
       }
-
+      // Prevent execution when not loggedin.
+      if(!wsLoggedin) break; 
+      
       if (json_action) {
         Serial.println("[Websocket] Got an action");
         if (json_game!="null" && !validGame(json_game)) {
@@ -115,7 +119,6 @@ void webSocketEvent(WStype_t WStype, uint8_t* payload, size_t length) {
           // Start game
           Serial.println("[Websocket] Starting game");
           if (!gameReady) {
-            robot_status = "in_game";
             sendMessageWebSocket("{\"error\": \"GAME_NOT_READY\"}");
             break;
           }
@@ -124,7 +127,7 @@ void webSocketEvent(WStype_t WStype, uint8_t* payload, size_t length) {
           gameName = json_game;
         } else if (json_action == "ended") {
           // Game ended
-          // Start game
+
           Serial.println("[Websocket] Stopping game");
           analogWrite(FrontRight, 0);
           analogWrite(FrontLeft, 0);

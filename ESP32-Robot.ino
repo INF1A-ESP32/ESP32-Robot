@@ -112,7 +112,7 @@ void loop() {
   unsigned long currentMillis = millis(); 
 
   // Send every X seconds a status to the server with the websocket.
-  if (currentMillis - wsStatusMillis >= wsStatusInterval) {
+  if (currentMillis - wsStatusMillis >= wsStatusInterval && wsLoggedin) {
     if(wsConnected) wsStatusSend(); // Only send updates when the websocket is connected
     
     // Reset the timer
@@ -150,17 +150,17 @@ void loop() {
     if(gameMillis==0) gameMillis = millis();
 
     // For testing send after X seconds status that the game is finisched.
-    if (currentMillis - gameMillis >= gameInterval) {
+    if (currentMillis - gameMillis >= gameInterval &&robot_status == "in_game" ) {
       // Stop the game
       setGameDefaults();
       // Update the status messages
       robot_status = "finished";
       robot_acceleration = 0;
       robot_is_driving = "false";
-       analogWrite(FrontRight, 0);
-    analogWrite(FrontLeft, 0);
-    analogWrite(BackRight, 0);
-    analogWrite(BackLeft, 0);
+      analogWrite(FrontRight, 0);
+      analogWrite(FrontLeft, 0);
+      analogWrite(BackRight, 0);
+      analogWrite(BackLeft, 0);
       // Send a update to the websocket
       wsStatusSend();
       // Reset the timers

@@ -24,5 +24,7 @@ int IRRight = 39;
 const char* ssid = "Wifi is saai"; // Wifi SSID
 const char* password = "2much4u2day"; //Wi-FI Password
 
-const char* webSocketHost = "192.168.20.155";
-const int webSocketPort = 3003;
+// const char* webSocketHost = "10.110.111.103";
+const char* webSocketHost = "battlebot1.serverict.nl";
+const int webSocketPort = 33003;
+
