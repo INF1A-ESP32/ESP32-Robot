@@ -17,7 +17,7 @@ void left()
   analogWrite(FrontLeft, LOW);
   analogWrite(BackRight, LOW);
   analogWrite(FrontRight, v);
-  analogWrite(BackLeft, vTurn);
+  analogWrite(BackLeft, v/1.2);
 }
 
 void right()
@@ -27,7 +27,7 @@ void right()
   analogWrite(FrontRight, LOW);
   analogWrite(BackLeft, LOW);
   analogWrite(FrontLeft, v);
-  analogWrite(BackRight, vTurn);
+  analogWrite(BackRight, v/1.2);
 }
 
 void back()
