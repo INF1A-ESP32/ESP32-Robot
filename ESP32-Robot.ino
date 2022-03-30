@@ -8,18 +8,8 @@
 unsigned long wsStatusMillis = 0;
 const int wsStatusInterval = 5000;
 
-// game prepair timer
-unsigned long startGameMillis = 0;
-const int startGameInterval = 15000;
-
-// game play timer for testing
-unsigned long gameMillis = 0;
-const int gameInterval = 30000;
-
 // reset game timers to prefent inaccurate messages
-void resetGameTimers(){
-  startGameMillis = 0;
-  gameMillis = 0;
+void resetGameTimers() {
 }
 
 /*
@@ -31,27 +21,28 @@ void resetGameTimers(){
 // Websocket status
 bool wsLoggedin = false;
 bool wsConnected = false;
-bool wsHasJson = false; // Tracks if the websocket request has json
+bool wsHasJson = false;  // Tracks if the websocket request has json
 
 // Robot status
 String robot_status = "preparing";
-String robot_is_driving; 
+String robot_is_driving;
 int robot_acceleration;
 
 // Game settings/status
 bool prepairGame;
 bool playGame;
 bool gameReady;
+bool gameOver;
 String gameName;
 
-void setStatusDefaults(){
+void setStatusDefaults() {
   robot_status = "ready";
   // Set a true/false string because else it cannot send over the websocket
-  robot_is_driving = "false"; 
+  robot_is_driving = "false";
   robot_acceleration = 0;
 }
 
-void setGameDefaults(){
+void setGameDefaults() {
   prepairGame = false;
   playGame = false;
   gameReady = false;
@@ -70,8 +61,9 @@ void setGameDefaults(){
 // Load the `ESP32 AnalogWrite` by Brian Taylor
 #include <analogWrite.h>
 // Load the settings and own modules
-#include "settings.h"
 #include "display.h"
+#include "settings.h"
+#include "drive.h"
 #include "websocket.h"
 
 void setup() {
@@ -85,10 +77,7 @@ void setup() {
   pinMode(IRLeft, INPUT);
   pinMode(IRRight, INPUT);
   // Stop the robot
-  analogWrite(FrontRight, LOW);
-  analogWrite(FrontLeft, LOW);
-  analogWrite(BackRight, LOW);
-  analogWrite(BackLeft, LOW);
+  off();
   // Show groupname on display
   displayBootAnimation();
   setGameDefaults();
@@ -96,61 +85,100 @@ void setup() {
   delay(3000);
 }
 
-int calcSpeed(char wheel, int power){
-  if(wheel == 'l'){
-    return floor(speedL/100*power);
-  }
-  return floor(speedR/100*power);
-}
-
 void loop() {
   // Keeps the websocket open and recieves commands.
   // If there is a delay inside this loop the websocket will be disconnected
-  webSocket.loop(); 
+  webSocket.loop();
 
   // Get the current time for the timers
-  unsigned long currentMillis = millis(); 
+  unsigned long currentMillis = millis();
 
   // Send every X seconds a status to the server with the websocket.
-  if (currentMillis - wsStatusMillis >= wsStatusInterval && wsLoggedin) {
-    if(wsConnected) wsStatusSend(); // Only send updates when the websocket is connected
-    
+  if (currentMillis - wsStatusMillis >= 5000 && wsLoggedin) {
+    if (wsConnected)
+      wsStatusSend();  // Only send updates when the websocket is connected
+
     // Reset the timer
-    wsStatusMillis = millis(); 
+    wsStatusMillis = millis();
   }
 
-  // When the game needs to be prepaired
-  if(prepairGame){
-    // If there is no time yet set the current time for the timers.
-    if(startGameMillis==0) startGameMillis = millis();
+  int sRight = analogRead(IRRight);
+  int sLeft = analogRead(IRLeft);
+  display.clearDisplay();  // clears display
+  display.invertDisplay(false);
+  display.setTextSize(2);  // sets text size
+  display.setTextColor(WHITE);
+  display.setCursor(0, 6);  // sets cursor
+  display.print("R: ");
+  display.print(sRight);  // displays text
+  display.setCursor(0, 26);
+  display.print("L: ");
+  display.print(sLeft);
+  display.display();
 
-    // For testing send after X seconds status that the game is prepaired.
-    if (currentMillis - startGameMillis >= startGameInterval) {
-      // Tell the server that the game is ready to start
-      sendMessageWebSocket("{\"status\": true, \"game\": \""+gameName+"\"}");
-      // Update the status variables so it can play the game on command.
-      gameReady = true;
-      prepairGame = false;
+  // When the game needs to be prepaired
+  if (prepairGame) {
+    if (gameName == "race") {
+      // When the game is race the robot is direct ready
+      sendMessageWebSocket("{\"status\": true, \"game\": \"" + gameName + "\"}");
       robot_status = "ready";
+      prepairGame = false;
+      gameReady = true;
     }
   }
 
-  // When the game needs to be played
-  if(playGame){
-    analogWrite(FrontRight, 255);
-    analogWrite(FrontLeft, 255);
-    analogWrite(BackRight, 0);
-    analogWrite(BackLeft, 0);
-    // Update the statuses
-    robot_status = "in_game";
-    robot_acceleration = rand() % 100 + 1; // For testing does this return a ranom number
-    robot_is_driving = "true"; // For testing is this not read from the sensors
+  if (playGame) {
+    if (gameName == "race") {
+      robot_status = "in_game";
+      robot_is_driving = "true";
 
-    // If there is no time yet set the current time for the timers.
-    if(gameMillis==0) gameMillis = millis();
-
-    // For testing send after X seconds status that the game is finisched.
-    if (currentMillis - gameMillis >= gameInterval &&robot_status == "in_game" ) {
+      if (currentMillis - previousMillis >= interval) {
+        previousMillis = currentMillis;
+        if (vTurn == LOW) {
+          vTurn = v;
+        } else {
+          vTurn = LOW;
+        }
+      }
+      if (sRight < 120 && sLeft < 120) {
+        // If on white surface, go straight
+        straight();
+      }
+      // websocket status updates
+      unsigned long wsStatusMillis = 0;
+      const int wsStatusInterval = 5000;
+     
+      if (sRight < 120 && sLeft > 120) {
+        // If right is on white and left is on black, go right
+        // off();
+        // delay(200);
+        right();
+      }
+      if (sRight > 120 && sLeft < 120) {
+        // if right is on black and left is on white, go left
+        // off();
+        // delay(200);
+        left();
+      }
+      if (sRight > 120 && sLeft > 120 && backCount < 10) {
+        // if on black surface go back.
+        // off();
+        back();
+        delay(100);
+        // left();
+      }
+      if (backCount >= 9) {
+        // turn off after 1 second
+        off();
+      }
+      if (sRight <2 && sLeft < 2) {
+        gameOver = true;
+      }
+    }else if (gameName == "maze"){
+      
+    }
+    if (gameOver) {
+      robot_is_driving = "false";
       // Stop the game
       setGameDefaults();
       // Update the status messages
@@ -169,55 +197,4 @@ void loop() {
       robot_status = "ready";
     }
   }
-  
-  char* predictL = "UNKNOWN";
-  char* predictR = "UNKNOWN";
-
-  int sLeft = analogRead(39);
-  int sRight = analogRead(34);
-
-  int lWhiteThreshold = 90;
-  int lgrayLightThreshold = 250;
-  int lgrayDarkThreshold = 1800;
-
-  int rWhiteThreshold = 60;
-  int rgrayLightThreshold = 250;
-  int rgrayDarkThreshold = 1800;
-
-  if (sLeft < lWhiteThreshold) {
-    predictL = "white";
-  } else if (sLeft < lgrayLightThreshold) {
-    predictL = "l gray";
-  } else if (sLeft < lgrayDarkThreshold) {
-    predictL = "d gray";
-  } else {
-    predictL = "black";
-  }
-  if (sRight < rWhiteThreshold) {
-    predictR = "white";
-  } else if (sRight < rgrayLightThreshold) {
-    predictR = "l gray";
-  } else if (sRight < rgrayDarkThreshold) {
-    predictR = "d gray";
-  } else {
-    predictR = "black";
-  }
-
-  display.clearDisplay();  // clears display
-  display.invertDisplay(false);
-  display.setTextSize(2);  // sets text size
-  display.setTextColor(WHITE);
-  display.setCursor(2, 6);  // sets cursor
-  display.print(sRight);
-
-  display.setTextSize(2);    // sets text size
-  display.setCursor(2, 26);  // sets cursor
-  display.print("PL: ");
-  display.print(predictL);  // displays text
-  display.setCursor(2, 46);
-  display.print("PR: ");
-  display.print(predictR);  // displays text
-  display.display();
-
-  return;
 }
