@@ -1,62 +1,3 @@
-/*
--------------------------------------
- Configure Timers
--------------------------------------
-*/
-
-// websocket status updates
-unsigned long wsStatusMillis = 0;
-const int wsStatusInterval = 5000;
-
-// reset game timers to prefent inaccurate messages
-void resetGameTimers() {
-}
-
-/*
--------------------------------------
- Set game default settings
--------------------------------------
-*/
-
-// Websocket status
-bool wsLoggedin = false;
-bool wsConnected = false;
-bool wsHasJson = false;  // Tracks if the websocket request has json
-
-// Robot status
-String robot_status = "preparing";
-String robot_is_driving;
-int robot_acceleration;
-
-// Game settings/status
-bool prepairGame;
-bool playGame;
-bool gameReady;
-bool gameOver;
-String gameName;
-
-void setStatusDefaults() {
-  robot_status = "ready";
-  // Set a true/false string because else it cannot send over the websocket
-  robot_is_driving = "false";
-  robot_acceleration = 0;
-}
-
-void setGameDefaults() {
-  prepairGame = false;
-  playGame = false;
-  gameReady = false;
-  gameName = "";
-  setStatusDefaults();
-}
-
-/*
--------------------------------------
- Include external liberaries
--------------------------------------
-*/
-
-
 #include <Wire.h>
 // Load the `ESP32 AnalogWrite` by Brian Taylor
 #include <analogWrite.h>
@@ -97,21 +38,7 @@ void setup()
 
 void loop()
 {
-
-  // Keeps the websocket open and recieves commands.
-  // If there is a delay inside this loop the websocket will be disconnected
-  //webSocket.loop();
-
   unsigned long currentMillis = millis();
-
-  // Send every X seconds a status to the server with the websocket.
-//  if (currentMillis - wsStatusMillis >= 5000 && wsLoggedin) {
-//    if (wsConnected)
-//      wsStatusSend();  // Only send updates when the websocket is connected
-//
-//    // Reset the timer
-//    wsStatusMillis = millis();
-//  }
 
   VL53L0X_RangingMeasurementData_t measure;
   int distance = measure.RangeMilliMeter; 
@@ -127,9 +54,10 @@ void loop()
   display.print("Distance: ");
   display.print(distance);    // displays text
   display.display();
+  
     
       if (measure.RangeStatus != 4) {  // phase failures have incorrect data
-      Serial.print("Distance (mm): "); Serial.println(distance); Serial.println(sRight);Serial.println(sLeft);
+      Serial.print("Distance (mm): "); Serial.println(distance); 
       } else {
       Serial.println(" out of range ");
       }
@@ -168,7 +96,7 @@ void loop()
                   delay(100);
        }
 
-         if (sRight > 2000 && sLeft > 2000) {// if robot on black surface, finish
+         if (sRight > 2100 && sLeft > 2100) {// if robot on black surface, finish
           off();
         }
          
