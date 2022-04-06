@@ -13,6 +13,8 @@ int speedL = 233;
 int speedR = 214;
 // float speedL = 180;
 // float speedR = speedL-19;
+int vTurn = LOW;
+const int v = 180;
 
 //*************************
 //        Display
