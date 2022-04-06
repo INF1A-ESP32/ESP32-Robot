@@ -25,7 +25,7 @@ void wsStatusSend() {
 }
 
 bool validGame(String gameName){
-  return (gameName == "race");
+  return (gameName == "race" || gameName == "butler"); 
 } 
 
 String converter(uint8_t* str) {

@@ -56,15 +56,18 @@ void setGameDefaults() {
 -------------------------------------
 */
 
-#include <SPI.h>
 #include <Wire.h>
 // Load the `ESP32 AnalogWrite` by Brian Taylor
 #include <analogWrite.h>
+#include "Adafruit_VL53L0X.h"
 // Load the settings and own modules
 #include "display.h"
 #include "settings.h"
 #include "drive.h"
 #include "websocket.h"
+#include "butler.h"
+
+Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 
 void setup() {
   // Start the serial monitor
@@ -74,8 +77,6 @@ void setup() {
   pinMode(BackRight, OUTPUT);
   pinMode(FrontLeft, OUTPUT);
   pinMode(BackLeft, OUTPUT);
-  pinMode(IRLeft, INPUT);
-  pinMode(IRRight, INPUT);
   // Stop the robot
   off();
   // Show groupname on display
@@ -83,7 +84,14 @@ void setup() {
   setGameDefaults();
   connectWebSocket();
   delay(3000);
+  if (!lox.begin()) {
+    Serial.println(F("Failed to boot VL53L0X"));
+    while(1);
+  }
+  // power lidar
+  Serial.println(F("VL53L0X API Simple Ranging example\n\n")); 
 }
+
 
 void loop() {
   // Keeps the websocket open and recieves commands.
@@ -102,24 +110,28 @@ void loop() {
     wsStatusMillis = millis();
   }
 
+  //gets de lidar distance data
+  VL53L0X_RangingMeasurementData_t measure;
+  int distance = measure.RangeMilliMeter; 
+  lox.rangingTest(&measure, false); // pass in 'true' to get debug data printout! 
+
   int sRight = analogRead(IRRight);
   int sLeft = analogRead(IRLeft);
   display.clearDisplay();  // clears display
   display.invertDisplay(false);
   display.setTextSize(2);  // sets text size
   display.setTextColor(WHITE);
-  display.setCursor(0, 6);  // sets cursor
-  display.print("R: ");
-  display.print(sRight);  // displays text
-  display.setCursor(0, 26);
-  display.print("L: ");
-  display.print(sLeft);
-  display.display();
 
   // When the game needs to be prepaired
   if (prepairGame) {
     if (gameName == "race") {
       // When the game is race the robot is direct ready
+      sendMessageWebSocket("{\"status\": true, \"game\": \"" + gameName + "\"}");
+      robot_status = "ready";
+      prepairGame = false;
+      gameReady = true;
+    }
+    if (gameName == "butler") {
       sendMessageWebSocket("{\"status\": true, \"game\": \"" + gameName + "\"}");
       robot_status = "ready";
       prepairGame = false;
@@ -131,6 +143,14 @@ void loop() {
     if (gameName == "race") {
       robot_status = "in_game";
       robot_is_driving = "true";
+
+      display.setCursor(0, 6);  // sets cursor
+      display.print("R: ");
+      display.print(sRight);  // displays text
+      display.setCursor(0, 26);
+      display.print("L: ");
+      display.print(sLeft);
+      display.display();
 
       if (currentMillis - previousMillis >= interval) {
         previousMillis = currentMillis;
@@ -176,7 +196,62 @@ void loop() {
       }
     }else if (gameName == "maze"){
       
+    }else if (gameName == "butler"){
+        robot_status = "in_game";
+        robot_is_driving = "true";
+          
+          display.clearDisplay();  // clears display
+          display.setCursor(0, 6); // sets cursor
+          display.print("Distance: ");
+          display.print(distance);    // displays text
+          display.display(); 
+      
+      if (measure.RangeStatus != 4) {  // phase failures have incorrect data
+      Serial.print("Distance (mm): "); Serial.println(distance); 
+      } else {
+      Serial.println(" out of range ");
+      }
+
+       if (distance > 220)
+        {
+          straight();
+        }
+
+       if (distance < 220)//search
+       {
+                  off();
+
+                  delay(800);
+      
+                  analogWrite(FrontRight, LOW);
+                  analogWrite(BackLeft, LOW);
+                  analogWrite(FrontLeft, 165);
+                  analogWrite(BackRight, 165);  
+    
+                  delay(500);
+    
+                  analogWrite(FrontLeft, LOW);
+                  analogWrite(BackRight, LOW);
+                  analogWrite(FrontRight, 165);
+                  analogWrite(BackLeft, 165);
+    
+                  delay(400);   
+
+                  off();
+
+                  delay(1000);
+
+                  back();
+
+                  delay(100);
+       }
+
+         if (sRight > 2100 && sLeft > 2100) {// if robot on black surface, finish
+          off();
+        }
+
     }
+
     if (gameOver) {
       robot_is_driving = "false";
       // Stop the game
