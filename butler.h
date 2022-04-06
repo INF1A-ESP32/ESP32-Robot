@@ -1,23 +1,29 @@
-// *************************
-//          Wheels
-// *************************
-int FrontRight = 17;
-int BackRight = 16;
-int FrontLeft = 18;
-int BackLeft = 5;
+unsigned long currentMillis = millis();
+int timer = 500;
 
-// *************************
-//    Speed ofset wheels
-// *************************
-int speedL = 233;
-int speedR = 214;
-// float speedL = 180;
-// float speedR = speedL-19;
-int vTurn = LOW;
-const int v = 180;
+void Stop()
+{
+    int wait = 1000;
+    if (currentMillis - previousMillis <= wait){
+      off();
+    }
+    previousMillis = currentMillis;
+}        
+        
+void goLeft()
+{
+    int goLeft = 500;
+    currentMillis = previousMillis;
+    if (previousMillis <= goLeft){
+      left();
+    }
+}
 
-//*************************
-//        Display
-//*************************
-int IRLeft = 34;
-int IRRight = 39;
+void goRight()
+{
+    int goRight = 500;
+    currentMillis = previousMillis;
+    if (previousMillis <= goRight){
+      right();
+    }
+}

@@ -1,7 +1,9 @@
-int count = 0;
+int backCount = 0;
 
 void straight()
+//drive straight
 {
+  backCount = 0;
   analogWrite(BackRight, LOW);
   analogWrite(BackLeft, LOW);
   analogWrite(FrontRight, v);
@@ -11,24 +13,27 @@ void straight()
 void left()
 //drive left
 {
+  backCount = 0;
   analogWrite(FrontLeft, LOW);
   analogWrite(BackRight, LOW);
   analogWrite(FrontRight, v);
-  analogWrite(BackLeft, vTurn);
+  analogWrite(BackLeft, v/1.2);
 }
 
 void right()
 //drive right
 {
+  backCount = 0;
   analogWrite(FrontRight, LOW);
   analogWrite(BackLeft, LOW);
   analogWrite(FrontLeft, v);
-  analogWrite(BackRight, vTurn);
+  analogWrite(BackRight, v/1.2);
 }
 
 void back()
 //drive back
 {
+  backCount++;
   analogWrite(FrontLeft, LOW);
   analogWrite(FrontRight, LOW);
   analogWrite(BackLeft, v);
@@ -44,39 +49,3 @@ void off()
   analogWrite(BackRight, LOW);
 }
 
-
-// *************************
-//         Maze game
-// *************************
-
-
-unsigned long currentMillis = millis();
-int previousMillis = 0;
-int timer = 500;
-
-void Stop()
-{
-    int wait = 1000;
-    if (currentMillis - previousMillis <= wait){
-      off();
-    }
-    previousMillis = currentMillis;
-}        
-        
-void goLeft()
-{
-    int goLeft = 500;
-    currentMillis = previousMillis;
-    if (previousMillis <= goLeft){
-      left();
-    }
-}
-
-void goRight()
-{
-    int goRight = 500;
-    currentMillis = previousMillis;
-    if (previousMillis <= goRight){
-      right();
-    }
-}
