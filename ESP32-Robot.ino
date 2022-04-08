@@ -59,8 +59,8 @@ void setGameDefaults() {
 // Load the settings and own modules
 
 #include "display.h"
-#include "drive.h"
 #include "settings.h"
+#include "drive.h"
 #include "websocket.h"
 #include "butler.h"
 #include "maze.h"

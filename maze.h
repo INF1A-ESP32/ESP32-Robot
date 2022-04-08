@@ -1,10 +1,4 @@
 void playMaze(){
-  // Change the sides of the wheel to match the orientation of the robot
-  int WheelFrontRight = 5;
-  int WheelBackRight = 18;
-  int WheelFrontLeft = 16;
-  int WheelBackLeft = 17;
-
   // Set the default speed of each wheel
   int speedLeft = 180;
   int speedRight = 180;
