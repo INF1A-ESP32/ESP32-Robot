@@ -164,15 +164,8 @@ void loop() {
 
   // When the game needs to be prepaired
   if (prepairGame) {
-    if (gameName == "race") {
+    if (validGame(gameName)) {
       // When the game is race the robot is direct ready
-      sendMessageWebSocket("{\"status\": true, \"game\": \"" + gameName +
-                           "\"}");
-      robot_status = "ready";
-      prepairGame = false;
-      gameReady = true;
-    }
-    if (gameName == "butler") {
       sendMessageWebSocket("{\"status\": true, \"game\": \"" + gameName +
                            "\"}");
       robot_status = "ready";
@@ -181,10 +174,10 @@ void loop() {
     }
   }
   if (playGame) {
-    if (gameName == "race") {
-      robot_status = "in_game";
-      robot_is_driving = "true";
+    robot_status = "in_game";
+    robot_is_driving = "true";
 
+    if (gameName == "race") {
       if (currentMillis - previousMillis >= 150) {
         previousMillis = currentMillis;
         if (vTurn == 0) {
@@ -219,9 +212,6 @@ void loop() {
         gameOver = true;
       }
     } else if (gameName == "butler") {
-      robot_status = "in_game";
-      robot_is_driving = "true";
-
       display.clearDisplay();  // clears display
       display.setCursor(0, 6); // sets cursor
       display.print("Distance: ");
@@ -272,6 +262,8 @@ void loop() {
         // if robot on black surface, finish
         off();
       }
+    } else if (gameName == "maze"){
+      playMaze();
     }
 
     if (gameOver) {

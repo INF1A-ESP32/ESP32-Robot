@@ -33,7 +33,7 @@ void wsStatusSend() {
 }
 
 bool validGame(String gameName) {
-  return (gameName == "race" || gameName == "butler");
+  return (gameName == "race" || gameName == "butler" || gameName == "maze");
 }
 
 void webSocketEvent(WStype_t WStype, uint8_t *payload, size_t length) {
@@ -153,12 +153,13 @@ void webSocketEvent(WStype_t WStype, uint8_t *payload, size_t length) {
 
 void connectWebSocket() {
   bool wifiConnected = false;
-  String hostname = "onze.robbie.local";
-  WiFi.setHostname(hostname.c_str());
+
   while (!wifiConnected) {
     displayText("Verbinden met WIFI", 2, 6);
     WiFi.mode(WIFI_STA); // change the wifi mode to Station mode, which is the
                          // standard client mode
+    String hostname = "robbie";
+    WiFi.setHostname(hostname.c_str());
     WiFi.begin(ssid, password); // Connect to the WiFi
     // Wait until the device is connected
     int test = 0;
