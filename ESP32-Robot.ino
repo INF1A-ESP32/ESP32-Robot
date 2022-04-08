@@ -57,11 +57,12 @@ void setGameDefaults() {
 #include <Adafruit_VL53L0X.h>
 #include <analogWrite.h>
 // Load the settings and own modules
-#include "butler.h"
 #include "display.h"
-#include "drive.h"
 #include "settings.h"
+#include "drive.h"
 #include "websocket.h"
+#include "maze.h"
+#include "butler.h"
 
 Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 
