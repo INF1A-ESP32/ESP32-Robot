@@ -1,35 +1,40 @@
 // *************************
 //          Wheels
 // *************************
-int FrontRight = 17;
-int BackRight = 16;
-int FrontLeft = 18;
-int BackLeft = 5;
 
+int FrontRight = 16;
+int BackRight = 17;
+int FrontLeft = 5;
+int BackLeft = 18;
 // *************************
 //    Speed ofset wheels
 // *************************
-int speedL = 233;
-int speedR = 214;
-// float speedL = 180;
-// float speedR = speedL-19;
-int vTurn = LOW;
-const int v = 180;
+
+int speedL = 214;
+int speedR = 233;
+
+int vTurn = 0;
+int v = 180;
 
 //*************************
-//        Display
+//       IR Sensor
 //*************************
 int IRLeft = 34;
 int IRRight = 39;
 
+//*************************
+//         Timer
+//*************************
 unsigned long previousMillis = 0;
-const long interval = 150;
 
-// Wifi Credentials
-const char* ssid = "Wifi is saai"; // Wifi SSID
-const char* password = "2much4u2day"; //Wi-FI Password
+//*************************
+//          Wifi
+//*************************
+const char *ssid = "Wifi is saai";    // Wifi SSID
+const char *password = "2much4u2day"; // Wi-FI Password
 
-// const char* webSocketHost = "10.110.111.103";
- const char* webSocketHost = "battlebot1.serverict.nl";
-//const char* webSocketHost = "192.168.179.155";
-const int webSocketPort = 33003;
+//*************************
+//       Websocket
+//*************************
+const char *webSocketHost = "battlebot.oohnoo.nl";
+const int webSocketPort = 3003;
